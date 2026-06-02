@@ -2,9 +2,22 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 import uuid
 
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
+# Lazy loading model
+model = None
+
+
+def get_model():
+
+    global model
+
+    if model is None:
+
+        model = SentenceTransformer(
+            "all-MiniLM-L6-v2"
+        )
+
+    return model
+
 
 client = chromadb.PersistentClient(
     path="chroma_db"
@@ -19,26 +32,29 @@ def store_chunks(chunks):
 
     for chunk in chunks:
 
-        embedding = model.encode(
+        embedding = get_model().encode(
             chunk["content"]
         ).tolist()
+
+        metadata = {
+            "page": chunk["page"]
+        }
+
+        if "file" in chunk:
+
+            metadata["file"] = chunk["file"]
 
         collection.add(
             ids=[str(uuid.uuid4())],
             embeddings=[embedding],
             documents=[chunk["content"]],
-            metadatas=[
-                {
-                    "file": chunk["file"],
-                    "page": chunk["page"]
-                }
-            ]
+            metadatas=[metadata]
         )
 
 
 def search_docs(query):
 
-    query_embedding = model.encode(
+    query_embedding = get_model().encode(
         query
     ).tolist()
 
@@ -48,6 +64,7 @@ def search_docs(query):
     )
 
     return results
+
 
 def keyword_search(query):
 
