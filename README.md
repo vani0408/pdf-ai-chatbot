@@ -43,7 +43,7 @@ The system extracts text from PDFs, converts text into embeddings, stores them i
 
 ### LLM
 
-* Gemini 1.5 Flash
+* Gemini 2.5 Flash
 
 ### Embedding Model
 
@@ -105,7 +105,7 @@ Generate Embeddings
 (Vector + Keyword)
           |
           v
- Gemini 1.5 Flash
+ Gemini 2.5 Flash
           |
           v
 Answer + Citations
