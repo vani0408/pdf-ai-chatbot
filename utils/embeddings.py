@@ -2,8 +2,9 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 import uuid
 
-# Lazy loading model
 model = None
+client = None
+collection = None
 
 
 def get_model():
@@ -19,16 +20,27 @@ def get_model():
     return model
 
 
-client = chromadb.PersistentClient(
-    path="chroma_db"
-)
+def get_collection():
 
-collection = client.get_or_create_collection(
-    name="pdf_docs"
-)
+    global client
+    global collection
+
+    if collection is None:
+
+        client = chromadb.PersistentClient(
+            path="chroma_db"
+        )
+
+        collection = client.get_or_create_collection(
+            name="pdf_docs"
+        )
+
+    return collection
 
 
 def store_chunks(chunks):
+
+    collection = get_collection()
 
     for chunk in chunks:
 
@@ -54,6 +66,8 @@ def store_chunks(chunks):
 
 def search_docs(query):
 
+    collection = get_collection()
+
     query_embedding = get_model().encode(
         query
     ).tolist()
@@ -67,6 +81,8 @@ def search_docs(query):
 
 
 def keyword_search(query):
+
+    collection = get_collection()
 
     results = collection.get()
 
